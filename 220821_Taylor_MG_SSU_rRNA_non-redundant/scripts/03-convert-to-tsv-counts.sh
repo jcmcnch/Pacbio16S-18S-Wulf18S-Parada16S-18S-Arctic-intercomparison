@@ -6,10 +6,10 @@ for inputFolder in EGC-classified-SILVA138.1 WSC-classified-SILVA138.1 ; do
 
                 for item in `ls $inputFolder/*.classified.SILVA138.1.tsv`; do
 
-			SampleID=`basename $item .classified.SILVA138.1.tsv`
+			SampleID=`basename $item _SSU_rRNA.classified.SILVA138.1.tsv`
 			outfile=`basename $item .tsv`.taxtable.tsv
 			printf "SampleID\t$SampleID\n" > $inputFolder/$outfile
-			sed -re 's/\([0-9]{1}.[0-9]{2}\)//g' $item | cut -f2 | sort | uniq -c | awk '{print $2,"\t",$1}' | sed 's/^ \t/d:Unclassified\t/g' >> $inputFolder/$outfile
+			sed -re 's/\([0-9]{1}.[0-9]{2}\)//g' $item | cut -f2 | cut -f1-5 -d, | sort | uniq -c | awk '{print $2,"\t",$1}' | sed 's/^ \t/d:Unclassified\t/g' >> $inputFolder/$outfile
 
         done
 done
