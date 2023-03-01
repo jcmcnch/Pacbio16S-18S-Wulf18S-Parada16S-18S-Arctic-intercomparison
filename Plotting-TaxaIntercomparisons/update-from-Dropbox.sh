@@ -6,4 +6,4 @@ cp -r /home/jesse/Dropbox/02-Collaborations/Matthias/221129_integrative_plotting
 cp -r /home/jesse/Dropbox/02-Collaborations/Matthias/221129_integrative_plotting/metadata/ .
 cp /home/jesse/Dropbox/02-Collaborations/Matthias/221129_integrative_plotting/*sh setup-scripts/
 cp /home/jesse/Dropbox/02-Collaborations/Matthias/221129_integrative_plotting/*R .
-cp /home/jesse/Dropbox/02-Collaborations/Matthias/221129_integrative_plotting/*Rhistory .
+cp /home/jesse/Dropbox/02-Collaborations/Matthias/221129_integrative_plotting/.Rhistory .
