@@ -45,10 +45,19 @@ Parada <- subset_samples(Parada, Sample_type=="F4")
 Wulf <- subset_samples(Wulf, Sample_type=="F4")
 Wulf <- set_sample_order(Wulf, c('ERR5533347','ERR5533345','ERR5533344','ERR5533343','ERR5533338','ERR5533333','ERR5533331','ERR5533329','ERR5533328','ERR5533327'))
 
+Wulf = relative_abundance(Wulf)
+Parada = relative_abundance(Parada)
+MG = relative_abundance(MG)
+
+Wulf_subset <- subset_taxa(Wulf, Phylum=="p__Diatomea")
+Parada_subset <- subset_taxa(Parada, Phylum=="Stramenopiles")
+MG_subset <- subset_taxa(MG, Phylum=="p:Diatomea")
+
+
 #then do some plotting
-MGline <- abundance_lines(MG, classification = 'Phylum', relative_abundance = TRUE, treatment = "Sample_type", sample_labels = sample_data(MG)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
-ParadaLine <- abundance_lines(Parada, classification = 'Phylum', relative_abundance = TRUE, treatment = "Sample_type", sample_labels = sample_data(Parada)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
-WulfLine <- abundance_lines(Wulf, classification = 'Phylum', relative_abundance = TRUE, treatment = "Sample_type", sample_labels = sample_data(Wulf)$date) #+ theme(axis.text.x = element_blank())
+MGline <- abundance_lines(MG_subset, classification = 'Class', relative_abundance = FALSE, treatment = "Sample_type", sample_labels = sample_data(MG)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
+ParadaLine <- abundance_lines(Parada_subset, classification = 'Class', relative_abundance = FALSE, treatment = "Sample_type", sample_labels = sample_data(Parada)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
+WulfLine <- abundance_lines(Wulf_subset, classification = 'Class', relative_abundance = FALSE, treatment = "Sample_type", sample_labels = sample_data(Wulf)$date) #+ theme(axis.text.x = element_blank())
 grid.arrange(MGline, ParadaLine, WulfLine, ncol=1)
 
 plot_bar(Wulf, "date", "Abundance", "Domain")
