@@ -1,18 +1,32 @@
 #!/bin/bash -i
 
-for inputFolder in EGC-classified-SILVA138.1 WSC-classified-SILVA138.1 ; do
+for inputFolder in EGC-merged-taxonomy WSC-merged-taxonomy ; do
 
         outdir=$inputFolder
 
-                for item in `ls $inputFolder/*.classified.SILVA138.1.tsv`; do
+                for item in `ls $inputFolder/*.merged-tax.tsv`; do
 
-			SampleID=`basename $item _SSU_rRNA.classified.SILVA138.1.tsv`
-			outfile=`basename $item .tsv`.taxtable.tsv
-			printf "SampleID\t$SampleID\n" > $inputFolder/$outfile
-			sed -re 's/\([0-9]{1}.[0-9]{2}\)//g' $item | cut -f2 | cut -f1-5 -d, | sort | uniq -c | awk '{print $2,"\t",$1}' | sed 's/^ \t/d:Unclassified\t/g' >> $inputFolder/$outfile
+                        SampleID=`basename $item .merged-tax.tsv`
+                        outfile=`basename $item .tsv`_SSU_rRNA.taxtable.tsv
+                        printf "SampleID\t$SampleID\n" > $inputFolder/$outfile
+                        sed -re 's/\([0-9]{1}.[0-9]{2}\)//g' $item | cut -f2 | cut -f1-5 -d, | sort | uniq -c | awk '{print $2,"\t",$1}' | sed 's/^ \t/d:Unclassified\t/g' >> $inputFolder/$outfile
 
         done
 done
+
+#for inputFolder in EGC-classified-SILVA138.1 WSC-classified-SILVA138.1 ; do
+
+#        outdir=$inputFolder
+
+#                for item in `ls $inputFolder/*.classified.SILVA138.1.tsv`; do
+
+#			SampleID=`basename $item _SSU_rRNA.classified.SILVA138.1.tsv`
+#			outfile=`basename $item .tsv`.taxtable.tsv
+#			printf "SampleID\t$SampleID\n" > $inputFolder/$outfile
+#			sed -re 's/\([0-9]{1}.[0-9]{2}\)//g' $item | cut -f2 | cut -f1-5 -d, | sort | uniq -c | awk '{print $2,"\t",$1}' | sed 's/^ \t/d:Unclassified\t/g' >> $inputFolder/$outfile
+
+#        done
+#done
 
 
 #Remove confidence estimations from VSEARCH output, keep a copy for later steps but also pipe to subsequent commands
