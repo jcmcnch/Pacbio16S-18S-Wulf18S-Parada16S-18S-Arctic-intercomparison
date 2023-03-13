@@ -7,7 +7,7 @@ for inputFolder in EGC-merged-taxonomy WSC-merged-taxonomy ; do
                 for item in `ls $inputFolder/*.merged-tax.tsv`; do
 
                         SampleID=`basename $item .merged-tax.tsv`
-                        outfile=`basename $item .tsv`_SSU_rRNA.taxtable.tsv
+                        outfile=${SampleID}_SSU_rRNA.merged-tax.taxtable.tsv
                         printf "SampleID\t$SampleID\n" > $inputFolder/$outfile
                         sed -re 's/\([0-9]{1}.[0-9]{2}\)//g' $item | cut -f2 | cut -f1-5 -d, | sort | uniq -c | awk '{print $2,"\t",$1}' | sed 's/^ \t/d:Unclassified\t/g' >> $inputFolder/$outfile
 
