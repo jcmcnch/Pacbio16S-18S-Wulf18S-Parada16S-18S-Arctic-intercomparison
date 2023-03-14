@@ -3,13 +3,13 @@ library(tidyverse)
 library(phylosmith)
 library(gridExtra)
 #import files from biom, which works now
-MG <- import_biom("output-MG-combined-OTU-table/RAS_WGC_2016-2017.PacBio.merged.biom")
+MG <- import_biom("output-MG-combined-OTU-table/RAS_WGC_2016-2017.PacBio.merged.SILVA-PR2-tax.biom")
 colnames(tax_table(MG)) <- c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species")
 Parada <- import_biom("input-tag-ASV-tables/221129-1417_FRAM-Parada_2.0-fold-18S-correction_normalized_sequence_counts.biom")
 #note the taxonomy is different here because of PR2 having 8 levels
 colnames(tax_table(Parada)) <- c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species","Subspecies")
-Wulf <- import_biom("input-tag-ASV-tables/230307-2053.FRAM-Wulf.18S.all-18S-seqs.with-SILVA-tax.biom")
-colnames(tax_table(Wulf)) <- c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+Wulf <- import_biom("input-tag-ASV-tables/230307-2053.FRAM-Wulf.18S.all-18S-seqs.with-PR2-tax.biom")
+colnames(tax_table(Wulf)) <- c("Kingdom", "Supergroup", "Division", "Class", "Order", "Family", "Genus", "Species", "Subspecies")
 
 #next import sample data
 MGmeta <- read.delim("metadata/221110_sample_metadata.PacBio.tsv", sep = "\t", header = TRUE)
@@ -49,9 +49,9 @@ Wulf = relative_abundance(Wulf)
 Parada = relative_abundance(Parada)
 MG = relative_abundance(MG)
 
-Wulf_subset <- subset_taxa(Wulf, Phylum=="p__Diatomea")
-Parada_subset <- subset_taxa(Parada, Phylum=="Stramenopiles")
-MG_subset <- subset_taxa(MG, Phylum=="p:Diatomea")
+Wulf_subset <- subset_taxa(Wulf, Class=="Bacillariophyta")
+Parada_subset <- subset_taxa(Parada, Family=="Bacillariophyta_X:plas")
+MG_subset <- subset_taxa(MG, Order=="c:Bacillariophyta")
 
 
 #then do some plotting
@@ -59,8 +59,6 @@ MGline <- abundance_lines(MG_subset, classification = 'Class', relative_abundanc
 ParadaLine <- abundance_lines(Parada_subset, classification = 'Class', relative_abundance = FALSE, treatment = "Sample_type", sample_labels = sample_data(Parada)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
 WulfLine <- abundance_lines(Wulf_subset, classification = 'Class', relative_abundance = FALSE, treatment = "Sample_type", sample_labels = sample_data(Wulf)$date) #+ theme(axis.text.x = element_blank())
 grid.arrange(MGline, ParadaLine, WulfLine, ncol=1)
-
-plot_bar(Wulf, "date", "Abundance", "Domain")
 
 
 #TODO:
