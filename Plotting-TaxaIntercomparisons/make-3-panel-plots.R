@@ -2,14 +2,16 @@ library(phyloseq)
 library(tidyverse)
 library(phylosmith)
 library(gridExtra)
+library(gtable)
+library(grid)
 #import files from biom, which works now
 MG <- import_biom("output-MG-combined-OTU-table/RAS_WGC_2016-2017.PacBio.merged.SILVA-PR2-tax.biom")
-colnames(tax_table(MG)) <- c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+#colnames(tax_table(MG)) <- c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species")
 Parada <- import_biom("input-tag-ASV-tables/221129-1417_FRAM-Parada_2.0-fold-18S-correction_normalized_sequence_counts.biom")
 #note the taxonomy is different here because of PR2 having 8 levels
-colnames(tax_table(Parada)) <- c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species","Subspecies")
+#colnames(tax_table(Parada)) <- c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species","Subspecies")
 Wulf <- import_biom("input-tag-ASV-tables/230307-2053.FRAM-Wulf.18S.all-18S-seqs.with-PR2-tax.biom")
-colnames(tax_table(Wulf)) <- c("Kingdom", "Supergroup", "Division", "Class", "Order", "Family", "Genus", "Species", "Subspecies")
+#colnames(tax_table(Wulf)) <- c("Kingdom", "Supergroup", "Division", "Class", "Order", "Family", "Genus", "Species", "Subspecies")
 
 #next import sample data
 MGmeta <- read.delim("metadata/221110_sample_metadata.PacBio.tsv", sep = "\t", header = TRUE)
@@ -49,17 +51,60 @@ Wulf = relative_abundance(Wulf)
 Parada = relative_abundance(Parada)
 MG = relative_abundance(MG)
 
-Wulf_subset <- subset_taxa(Wulf, Class=="Bacillariophyta")
-Parada_subset <- subset_taxa(Parada, Family=="Bacillariophyta_X:plas")
-MG_subset <- subset_taxa(MG, Order=="c:Bacillariophyta")
+taxa_of_interest = c("c:Bacillariophyta","c:Bacillariophyta:plas","c:Spirotrichea","c:Arthropoda")
 
+MG <- conglomerate_taxa(MG, "Rank4")
+MG_subset <- taxa_extract(MG, taxa_of_interest)
+
+taxa_of_interest_Parada = c("Bacillariophyta","Bacillariophyta:plas","Spirotrichea","Arthropoda")
+Parada_subset <- taxa_extract(Parada, taxa_of_interest_Parada)
+
+taxa_of_interest_Wulf = c("Bacillariophyta","Bacillariophyta:plas","Spirotrichea","Arthropoda")
+Wulf_subset <- taxa_extract(Wulf, taxa_of_interest_Wulf)
+
+#MG_subset <- subset_taxa(MG, Rank4=="c:Bacillariophyta" | Rank3=="p:Ciliophora" | Rank5=="o:Crustacea")
+#Parada_subset <- subset_taxa(Parada, Rank5=="Bacillariophyta_X:plas" | Rank3=="Ciliophora" | Rank5=="Crustacea")
+#Wulf_subset <- subset_taxa(Wulf, Rank4=="Bacillariophyta" | Rank3=="Ciliophora"  | Rank5=="Crustacea")
 
 #then do some plotting
-MGline <- abundance_lines(MG_subset, classification = 'Class', relative_abundance = FALSE, treatment = "Sample_type", sample_labels = sample_data(MG)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
-ParadaLine <- abundance_lines(Parada_subset, classification = 'Class', relative_abundance = FALSE, treatment = "Sample_type", sample_labels = sample_data(Parada)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
-WulfLine <- abundance_lines(Wulf_subset, classification = 'Class', relative_abundance = FALSE, treatment = "Sample_type", sample_labels = sample_data(Wulf)$date) #+ theme(axis.text.x = element_blank())
-grid.arrange(MGline, ParadaLine, WulfLine, ncol=1)
+MGline <- abundance_lines(MG_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", sample_labels = sample_data(MG)$date) + theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank()) #+ scale_y_continuous(trans = "log10")
+color_map <- data.frame(taxa = taxa_of_interest,
+                        colors = phylosmith:::create_palette(length(taxa_of_interest)))
+MG_colors <- color_map$colors[match(unique(MGline$data$OTU), color_map$taxa, FALSE)]
+MGline <- MGline + ggplot2::scale_color_manual(values = MG_colors) 
+ParadaLine <- abundance_lines(Parada_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", sample_labels = sample_data(Parada)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
+color_map_Parada <- data.frame(taxa = taxa_of_interest_Parada,
+                        colors = phylosmith:::create_palette(length(taxa_of_interest_Parada)))
+Parada_colors <- color_map_Parada$colors[match(unique(ParadaLine$data$Rank4), color_map_Parada$taxa, FALSE)]
+ParadaLine <- ParadaLine + ggplot2:::scale_color_manual(values = Parada_colors) 
+WulfLine <- abundance_lines(Wulf_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", sample_labels = sample_data(Wulf)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
+color_map_Wulf <- data.frame(taxa = taxa_of_interest_Wulf,
+                        colors = phylosmith:::create_palette(length(taxa_of_interest_Wulf)))
+Wulf_colors <- color_map_Wulf$colors[match(unique(WulfLine$data$Rank4), color_map_Wulf$taxa, FALSE)]
+WulfLine <- WulfLine + ggplot2:::scale_color_manual(values = Wulf_colors)
+g1 <- ggplotGrob(MGline)
+g2 <- ggplotGrob(ParadaLine)
+g3 <- ggplotGrob(WulfLine)
+g1$widths=g2$widths=g3$widths
+g <- rbind(g1, g2, g3, size = "first")
+g$widths <- unit.pmax(g1$widths, g2$widths, g3$widths)
+#g$heights <- unit.pmax(g1$heights,g2$heights,g3$heights)
+grid.newpage()
+grid.arrange(g1, g2, g3, ncol=1)
+#grid.draw(g)
 
+
+#below code is trying to align x dimensions, but it causes other problems (probably solvable, see notes below)
+
+
+#have widths aligned, but not heights now
+#it's arranging them according to the maximum height of the axis
+#need to also figure out how to remove axis for grid (if possible)
+g <- rbind(g1, g2, g3, size = "first")
+g$widths <- unit.pmax(g1$widths, g2$widths, g3$widths)
+#g$heights <- unit.pmax(g1$heights, g2$heights, g3$heights)
+grid.newpage()
+grid.draw(g)
 
 #TODO:
 #Enforce same width
