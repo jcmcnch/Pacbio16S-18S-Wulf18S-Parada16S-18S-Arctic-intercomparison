@@ -66,18 +66,35 @@ Wulf_subset <- taxa_extract(Wulf, taxa_of_interest_Wulf)
 #Parada_subset <- subset_taxa(Parada, Rank5=="Bacillariophyta_X:plas" | Rank3=="Ciliophora" | Rank5=="Crustacea")
 #Wulf_subset <- subset_taxa(Wulf, Rank4=="Bacillariophyta" | Rank3=="Ciliophora"  | Rank5=="Crustacea")
 
-#then do some plotting
-MGline <- abundance_lines(MG_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", sample_labels = sample_data(MG)$date) + theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank()) #+ scale_y_continuous(trans = "log10")
+#PacBio
+#make plot and set theme
+MGline <- abundance_lines(MG_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", 
+                          sample_labels = sample_data(MG)$date) + 
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank(), legend.position = "none") 
+  #+ scale_y_continuous(trans = "log10")
+
+#apply custom colors
 color_map <- data.frame(taxa = taxa_of_interest,
                         colors = phylosmith:::create_palette(length(taxa_of_interest)))
 MG_colors <- color_map$colors[match(unique(MGline$data$OTU), color_map$taxa, FALSE)]
 MGline <- MGline + ggplot2::scale_color_manual(values = MG_colors) 
-ParadaLine <- abundance_lines(Parada_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", sample_labels = sample_data(Parada)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
+
+#Parada primers
+ParadaLine <- abundance_lines(Parada_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", 
+                              sample_labels = sample_data(Parada)$date) +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank()) 
+  #+ scale_y_continuous(trans = "log10")
 color_map_Parada <- data.frame(taxa = taxa_of_interest_Parada,
                         colors = phylosmith:::create_palette(length(taxa_of_interest_Parada)))
 Parada_colors <- color_map_Parada$colors[match(unique(ParadaLine$data$Rank4), color_map_Parada$taxa, FALSE)]
-ParadaLine <- ParadaLine + ggplot2:::scale_color_manual(values = Parada_colors) 
-WulfLine <- abundance_lines(Wulf_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", sample_labels = sample_data(Wulf)$date) + theme(axis.text.x = element_blank()) #+ scale_y_continuous(trans = "log10")
+ParadaLine <- ParadaLine + ggplot2:::scale_color_manual(values = Parada_colors)
+
+#Wulf 18S primers
+#cannot get rid of legend here for some odd reason. Works with MG, but not wulf. Maybe a weird typo somewhere.
+WulfLine <- abundance_lines(Wulf_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", 
+                            sample_labels = sample_data(Wulf)$date) +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank()) 
+  #+ scale_y_continuous(trans = "log10")
 color_map_Wulf <- data.frame(taxa = taxa_of_interest_Wulf,
                         colors = phylosmith:::create_palette(length(taxa_of_interest_Wulf)))
 Wulf_colors <- color_map_Wulf$colors[match(unique(WulfLine$data$Rank4), color_map_Wulf$taxa, FALSE)]
