@@ -73,7 +73,7 @@ Wulf_subset <- microbiome::transform(Wulf_subset, "clr")
 #make plot and set theme
 MGline <- abundance_lines(MG_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", 
                           sample_labels = sample_data(MG)$date) + 
-  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank()) #, legend.position = "none") 
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank(), legend.position = "none") 
   #+ scale_y_continuous(trans = "log10")
 
 #apply custom colors
@@ -96,8 +96,8 @@ ParadaLine <- ParadaLine + ggplot2:::scale_color_manual(values = Parada_colors)
 #cannot get rid of legend here for some odd reason. Works with MG, but not wulf. Maybe a weird typo somewhere.
 WulfLine <- abundance_lines(Wulf_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", 
                             sample_labels = sample_data(Wulf)$date) +
-  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank()) 
-  #+ scale_y_continuous(trans = "log10")
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank())#, legend.position = "none") 
+#+ scale_y_continuous(trans = "log10")
 color_map_Wulf <- data.frame(taxa = taxa_of_interest_Wulf,
                         colors = phylosmith:::create_palette(length(taxa_of_interest_Wulf)))
 Wulf_colors <- color_map_Wulf$colors[match(unique(WulfLine$data$Rank4), color_map_Wulf$taxa, FALSE)]
