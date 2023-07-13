@@ -51,16 +51,19 @@ Wulf = relative_abundance(Wulf)
 Parada = relative_abundance(Parada)
 MG = relative_abundance(MG)
 
-taxa_of_interest = c("c:Bacillariophyta","c:Bacillariophyta:plas","c:Spirotrichea","c:Arthropoda")
+taxa_of_interest = c("c:Bacillariophyta","c:Bacillariophyta:plas","c:Arthropoda") #"c:Spirotrichea",
 
 MG <- conglomerate_taxa(MG, "Rank4")
 MG_subset <- taxa_extract(MG, taxa_of_interest)
+MG_subset <- microbiome::transform(MG_subset,"clr")
 
-taxa_of_interest_Parada = c("Bacillariophyta","Bacillariophyta:plas","Spirotrichea","Arthropoda")
+taxa_of_interest_Parada = c("Bacillariophyta","Bacillariophyta:plas","Arthropoda") #"Spirotrichea",
 Parada_subset <- taxa_extract(Parada, taxa_of_interest_Parada)
+Parada_subset <- microbiome::transform(Parada_subset,"clr")
 
-taxa_of_interest_Wulf = c("Bacillariophyta","Bacillariophyta:plas","Spirotrichea","Arthropoda")
+taxa_of_interest_Wulf = c("Bacillariophyta","Bacillariophyta:plas","Arthropoda") #"Spirotrichea",
 Wulf_subset <- taxa_extract(Wulf, taxa_of_interest_Wulf)
+Wulf_subset <- microbiome::transform(Wulf_subset, "clr")
 
 #MG_subset <- subset_taxa(MG, Rank4=="c:Bacillariophyta" | Rank3=="p:Ciliophora" | Rank5=="o:Crustacea")
 #Parada_subset <- subset_taxa(Parada, Rank5=="Bacillariophyta_X:plas" | Rank3=="Ciliophora" | Rank5=="Crustacea")
@@ -70,7 +73,7 @@ Wulf_subset <- taxa_extract(Wulf, taxa_of_interest_Wulf)
 #make plot and set theme
 MGline <- abundance_lines(MG_subset, classification = 'Rank4', relative_abundance = FALSE, treatment = "method", 
                           sample_labels = sample_data(MG)$date) + 
-  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank(), legend.position = "none") 
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), legend.title = element_blank()) #, legend.position = "none") 
   #+ scale_y_continuous(trans = "log10")
 
 #apply custom colors
@@ -105,57 +108,6 @@ g3 <- ggplotGrob(WulfLine)
 g1$widths=g2$widths=g3$widths
 g <- rbind(g1, g2, g3, size = "first")
 g$widths <- unit.pmax(g1$widths, g2$widths, g3$widths)
-#g$heights <- unit.pmax(g1$heights,g2$heights,g3$heights)
+g$heights <- unit.pmax(g1$heights,g2$heights,g3$heights)
 grid.newpage()
 grid.arrange(g1, g2, g3, ncol=1)
-#grid.draw(g)
-
-
-#below code is trying to align x dimensions, but it causes other problems (probably solvable, see notes below)
-
-
-#have widths aligned, but not heights now
-#it's arranging them according to the maximum height of the axis
-#need to also figure out how to remove axis for grid (if possible)
-g <- rbind(g1, g2, g3, size = "first")
-g$widths <- unit.pmax(g1$widths, g2$widths, g3$widths)
-#g$heights <- unit.pmax(g1$heights, g2$heights, g3$heights)
-grid.newpage()
-grid.draw(g)
-
-#TODO:
-#Enforce same width
-#Unify taxonomy so that colours can be unified and tax_glom etc will be applied similarly
-#Play with different ways of plotting axes so that lower abundance taxa are visible
-#Think about transformation of data as suggested by Matthias
-
-#Still can't figure out why the otu_table slot is empty. This *might* be a phylosmith error. I can try to open an issue there, because googling about isn't really helping me.
-
-phylogeny_profile(Wulf, classification = 'Domain', treatment = "Sample_type", subset = NULL, merge = TRUE, relative_abundance = TRUE, colors = 'default')
-WulfSubset <- subset_taxa(Wulf, Domain=="Eukaryota")
-plot_bar(Wulf.Dinoflagellata,"date","Genus")
-#MGmeta <- MGmeta[order(as.Date(MGmeta$date, format="%m/%d/%Y")),]
-#ParadaMeta <- ParadaMeta[order(as.Date(ParadaMeta$date, format="%m/%d/%Y")),]
-#Parada <- set_sample_order(Parada, c('RAS_WSC_09_2016_1', 'RAS_WSC_10_2016', 'RAS_WSC_11_2016', 'RAS_WSC_12_2016_1', 'RAS_WSC_03_2017_2', 'RAS_WSC_05_2017_1', 'RAS_WSC_06_2017_1', 'RAS_WSC_07_2017_1', 'RAS_WSC_07_2017_2', 'RAS_WSC_07_2017_3'))
-#Parada <- set_sample_order(Parada, c("3409-FRAM-bactV4V5-F4-S-1-5plus6-S75-L001","3411-FRAM-bactV4V5-F4-S-1-9plus10-S77-L001","3412-FRAM-bactV4V5-F4-S-1-11plus12-S78-L001","3413-FRAM-bactV4V5-F4-S-1-13plus14-S79-L001","3418-FRAM-bactV4V5-F4-S-1-23plus24-S84-L001","3423-FRAM-bactV4V5-F4-S-1-33plus34-S89-L001","3425-FRAM-bactV4V5-F4-S-1-37plus38-S91-L001","3427-FRAM-bactV4V5-F4-S-1-41plus42-S93-L001","3428-FRAM-bactV4V5-F4-S-1-43plus44-S94-L001","3429-FRAM-bactV4V5-F4-S-1-45plus46-S95-L001"))
-#Wulf <- prune_taxa(taxa_sums(Wulf) > 0, Wulf)
-#Wulf <- subset_taxa(Wulf, Domain != "unassigned")
-#Parada <- set_sample_order(Parada, c('RAS_WSC_09_2016_1', 'RAS_WSC_10_2016', 'RAS_WSC_11_2016', 'RAS_WSC_12_2016_1', 'RAS_WSC_03_2017_2', 'RAS_WSC_05_2017_1', 'RAS_WSC_06_2017_1', 'RAS_WSC_07_2017_1', 'RAS_WSC_07_2017_2', 'RAS_WSC_07_2017_3'))
-
-
-
-
-#export to tsv to troubleshoot
-write_biom_tsv <- function(ps, file, sep = "; ") {
-  phyloseq::otu_table(ps) %>%
-    as.data.frame() %>%
-    rownames_to_column("#OTU ID") %>%
-    left_join(phyloseq::tax_table(ps) %>%
-                as.data.frame() %>%
-                rownames_to_column("#OTU ID") %>%
-                tidyr::unite("taxonomy", !`#OTU ID`, sep = sep)) -> phyloseq_biom
-  
-  write_tsv(phyloseq_biom, file = file)
-}
-
-write_biom_tsv(Wulf, "Wulf.test.tsv", sep = "; ")
